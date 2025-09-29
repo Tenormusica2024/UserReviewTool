@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Influencer Reviews | アカウント登録</title>
+  <meta name="description" content="x.comのAIインフルエンサーにユーザー別レビューを付けるサイトのフロントエンド草案。アカウント名登録フォーム。">
+
+  <style>
+    :root {
+      --bg-0: #0b0c0f;
+      --bg-1: #0f1116;
+      --bg-2: #13151c;
+      --fg-0: #e6e7ea;
+      --fg-1: #c6c8cf;
+      --muted: #9aa0a6;
+      --accent: #9f5ae0;
+      --accent-2: #00d4ff;
+      --success: #44d4a5;
+      --error: #ff6b6b;
+      --card: rgba(255,255,255,0.03);
+      --card-border: rgba(255,255,255,0.08);
+      --shadow: 0 20px 40px rgba(0,0,0,0.55);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      background: radial-gradient(1200px 600px at 10% 0%, #12121a 0%, var(--bg-0) 40%, #08090c 100%);
+      color: var(--fg-0);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      line-height: 1.6;
+    }
+    a { color: var(--fg-0); text-decoration: none; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: saturate(1.2) blur(8px);
+      background: linear-gradient(180deg, rgba(12,12,16,0.75), rgba(12,12,16,0.35));
+      border-bottom: 1px solid var(--card-border);
+    }
+    .nav {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      font-size: 18px;
+    }
+    .brand .logo {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: radial-gradient(100% 100% at 30% 30%, var(--accent) 0%, #6d39b5 55%, #2d174a 100%);
+      box-shadow: 0 0 24px rgba(159,90,224,0.45), inset 0 0 24px rgba(255,255,255,0.05);
+    }
+    .brand .name {
+      background: linear-gradient(90deg, #fff, #cfc6ff 45%, #7bf0ff 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .nav-links {
+      display: flex; align-items: center; gap: 18px;
+    }
+    .nav-links a {
+      color: var(--fg-1);
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .nav-links .cta {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      transition: all 200ms ease;
+    }
+    .nav-links .cta:hover {
+      border-color: rgba(159,90,224,0.45);
+      box-shadow: 0 8px 22px rgba(159,90,224,0.25);
+    }
+
+    .hero {
+      max-width: 1120px;
+      margin: 48px auto 24px;
+      padding: 0 24px;
+    }
+    .hero h1 {
+      font-size: clamp(24px, 4vw, 38px);
+      margin: 0 0 10px;
+      letter-spacing: 0.2px;
+      background: linear-gradient(90deg, #eaeaf1 0%, #c7cfe0 50%, #9f5ae0 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero p {
+      color: var(--muted);
+      max-width: 800px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 20px auto 80px;
+      padding: 0 24px;
+    }
+    .card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(700px 300px at 90% -10%, rgba(0,212,255,0.12) 0%, transparent 45%),
+        radial-gradient(500px 250px at -10% 110%, rgba(159,90,224,0.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .card-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 12px;
+      font-weight: 600;
+    }
+    .glow-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: radial-gradient(100% 100% at 50% 50%, var(--accent-2), #0089aa);
+      box-shadow: 0 0 16px rgba(0,212,255,0.65);
+    }
+    .stepper {
+      display: flex; align-items: center; gap: 12px; color: var(--muted);
+      font-size: 13px;
+    }
+    .stepper .step {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.03);
+    }
+    .step.current {
+      color: #eaeaf1; border-color: rgba(0,212,255,0.35);
+      box-shadow: inset 0 0 24px rgba(0,212,255,0.06);
+    }
+
+    .card-body {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+    }
+    @media (max-width: 880px) {
+      .card-body { grid-template-columns: 1fr; }
+    }
+
+    .section-title {
+      font-size: 14px; color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .input-group { margin-bottom: 18px; }
+    .input-group label {
+      display: block; font-size: 13px; color: var(--fg-1);
+      margin-bottom: 8px;
+    }
+
+    .handle-input {
+      display: flex; align-items: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border: 1px solid var(--card-border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .handle-input .prefix {
+      padding: 12px 12px; color: var(--muted);
+      border-right: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.04);
+      font-weight: 600;
+    }
+    .handle-input input {
+      flex: 1; padding: 12px 14px; background: transparent; color: var(--fg-0);
+      border: none; outline: none; font-size: 15px;
+    }
+    .handle-input:focus-within {
+      border-color: rgba(0,212,255,0.45);
+      box-shadow: 0 0 0 4px rgba(0,212,255,0.12), 0 18px 36px rgba(0,212,255,0.12);
+    }
+
+    .hint {
+      font-size: 12px; color: var(--muted); margin-top: 8px;
+    }
+    .hint.valid { color: var(--success); }
+    .hint.error { color: var(--error); }
+
+    .checkbox {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--fg-1);
+      user-select: none;
+    }
+    .checkbox input[type="checkbox"] {
+      appearance: none;
+      width: 18px; height: 18px; border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.03);
+      position: relative; cursor: pointer;
+    }
+    .checkbox input[type="checkbox"]:checked {
+      border-color: rgba(159,90,224,0.6);
+      background: linear-gradient(180deg, rgba(159,90,224,0.5), rgba(159,90,224,0.2));
+      box-shadow: 0 0 0 3px rgba(159,90,224,0.18), inset 0 0 12px rgba(0,0,0,0.2);
+    }
+    .checkbox input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute; inset: 3px;
+      border-radius: 4px;
+      background: radial-gradient(100% 100% at 50% 50%, #fff, #eaeaf1);
+    }
+
+    .actions {
+      display: flex; gap: 12px; margin-top: 20px;
+    }
+    .btn {
+      appearance: none; border: none; cursor: pointer;
+      padding: 12px 16px; border-radius: 12px;
+      font-weight: 600; font-size: 14px;
+      transition: transform 120ms ease, box-shadow 200ms ease, background 200ms ease, opacity 200ms ease;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, rgba(159,90,224,0.85), rgba(0,212,255,0.85));
+      color: #0c0d11;
+      box-shadow: 0 10px 24px rgba(159,90,224,0.35), 0 10px 28px rgba(0,212,255,0.28);
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-primary:disabled {
+      opacity: 0.6; box-shadow: none; cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--fg-0);
+      border: 1px solid var(--card-border);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    .preview {
+      border-left: 1px solid var(--card-border);
+      padding-left: 24px;
+    }
+    @media (max-width: 880px) {
+      .preview { border-left: none; padding-left: 0; }
+    }
+    .profile-preview {
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius: 14px;
+      padding: 16px;
+      display: flex; gap: 16px;
+    }
+    .avatar {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: radial-gradient(100% 100% at 30% 30%, #222433 0%, #171822 70%, #0d0e14 100%);
+      border: 1px solid var(--card-border);
+      box-shadow: inset 0 0 22px rgba(255,255,255,0.04);
+    }
+    .pv-head { display: flex; flex-direction: column; gap: 2px; }
+    .handle-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 10px; border-radius: 999px;
+      border: 1px solid rgba(0,212,255,0.35);
+      color: #b9f6ff;
+      background: rgba(0,212,255,0.06);
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .pv-sub {
+      font-size: 12px; color: var(--muted);
+    }
+
+    .success {
+      display: none;
+      padding: 18px 22px;
+      border-top: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(0,212,255,0.06), rgba(159,90,224,0.06));
+    }
+    .success.show { display: block; }
+    .success .msg {
+      display: flex; align-items: center; gap: 10px;
+      color: #c8fff3; font-weight: 600;
+    }
+    .success .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: radial-gradient(100% 100% at 50% 50%, var(--success), #1fa57d);
+      box-shadow: 0 0 16px rgba(68,212,165,0.6);
+    }
+
+    footer {
+      max-width: 1120px; margin: 50px auto; padding: 0 24px; color: var(--muted);
+      font-size: 12px;
+    }
+
+    .fade-up {
+      animation: fadeUp 440ms ease 1;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <noscript>このページを利用するにはJavaScriptを有効にしてください。</noscript>
+
+  <header>
+    <nav class="nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="name">NOVA Reviews</div>
+      </div>
+      <div class="nav-links">
+        <a href="#">ホーム</a>
+        <a href="#">インフルエンサーを探す</a>
+        <a href="#" class="cta">ログイン</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>AIインフルエンサーのユーザー別レビュー</h1>
+    <p>まずはx.comのアカウント名を登録してください。登録後、プロフィール確認やカテゴリ設定、レビュー方針の選択へと進めます。</p>
+  </section>
+
+  <div class="container">
+    <div class="card fade-up" role="region" aria-labelledby="card-title">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="glow-dot" aria-hidden="true"></span>
+          <span id="card-title">アカウント登録</span>
+        </div>
+        <div class="stepper" aria-label="ステップ">
+          <div class="step current">ステップ 1 / 3: アカウント名</div>
+          <div class="step">ステップ 2: プロフィール確認</div>
+          <div class="step">ステップ 3: カテゴリ選択</div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <form id="register-form" novalidate>
+          <div class="section-title">x.comのアカウント名を入力</div>
+          <div class="input-group" aria-live="polite">
+            <label for="handle">アカウント名（@は省略可）</label>
+            <div class="handle-input">
+              <span class="prefix">@</span>
+              <input id="handle" name="handle" type="text" inputmode="text" autocapitalize="none" spellcheck="false" autocomplete="off"
+                     placeholder="ai_influencer"
+                     aria-describedby="handle-hint"
+                     maxlength="15"
+                     pattern="[A-Za-z0-9_]{1,15}"
+                     title="英数字とアンダースコアのみ、1〜15文字">
+            </div>
+            <div id="handle-hint" class="hint">英数字とアンダースコアのみ、1〜15文字。例: ai_influencer, a1_dev_bot</div>
+          </div>
+
+          <div class="input-group">
+            <label for="display">表示名（任意）</label>
+            <input id="display" name="display" type="text" placeholder="例: NOVA AIレビュー編集部"
+                   style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--card-border);
+                          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); color: var(--fg-0);">
+            <div class="hint">レビュー一覧に表示される名称です。空欄でも構いません。</div>
+          </div>
+
+          <div class="checkbox">
+            <input type="checkbox" id="agree" name="agree">
+            <label for="agree">コミュニティガイドラインと利用規約に同意します</label>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" id="preview-btn">プレビュー更新</button>
+            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>アカウントを登録</button>
+          </div>
+
+          <div class="hint" style="margin-top: 10px;">
+            次のステップでは、仮のプロフィール情報を確認し、レビューに関連するカテゴリを選択します。
+          </div>
+        </form>
+
+        <aside class="preview" aria-label="プレビュー">
+          <div class="section-title">登録内容プレビュー</div>
+          <div class="profile-preview">
+            <div class="avatar" aria-hidden="true"></div>
+            <div class="pv-head">
+              <div class="handle-chip" id="pv-handle">
+                <span style="opacity:0.8">@</span><span id="pv-handle-text">your_handle</span>
+              </div>
+              <div class="pv-sub" id="pv-display">表示名: 未設定</div>
+              <div class="pv-sub">プラットフォーム: x.com</div>
+            </div>
+          </div>
+          <div class="hint" style="margin-top: 12px;">ハンドルは自動で正規化されます（@は除去、英小文字に統一）。</div>
+        </aside>
+      </div>
+
+      <div class="success" id="success" aria-live="polite">
+        <div class="msg">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="success-text">登録が完了しました。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 NOVA Reviews. これはフロントエンド草案です。実運用ではバックエンドAPIの接続と認証を実装してください。
+  </footer>
+</body>
+</html>
