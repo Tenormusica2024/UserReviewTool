@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Influencer Reviews | アカウント登録</title>
-  <meta name="description" content="x.comのAIインフルエンサーにユーザー別レビューを付けるサイトのフロントエンド草案。アカウント名登録フォーム。">
+  <title>AI Influencer Reviews | アカウント登録・検索・レビュー</title>
+  <meta name="description" content="x.comのAIインフルエンサーにユーザー別レビューを付けるサイトのフロントエンド草案。アカウント登録、検索、インフルエンサー個別ページでのレビューUI。">
 
   <style>
     :root {
@@ -314,6 +314,153 @@
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* Search UI */
+    .search-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      color: var(--fg-0);
+      outline: none;
+      font-size: 15px;
+    }
+    .search-input:focus {
+      border-color: rgba(0,212,255,0.45);
+      box-shadow: 0 0 0 4px rgba(0,212,255,0.12), 0 18px 36px rgba(0,212,255,0.12);
+    }
+    .results {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .result-item {
+      display: flex;
+      gap: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    }
+    .result-item .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .result-item .title {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .result-item .summary {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .result-item .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Influencer page */
+    #section-influencer .card-body {
+      grid-template-columns: 1fr; /* single column */
+    }
+    .wiki-content {
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .wiki-content h2, .wiki-content h3, .wiki-content h4 {
+      margin: 0 0 8px 0;
+      background: linear-gradient(90deg, #eaeaf1 0%, #c7cfe0 50%, #9f5ae0 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .wiki-content p { margin: 8px 0; color: var(--fg-1); }
+    .wiki-content ul { padding-left: 18px; }
+    .wiki-content a { color: #7bf0ff; text-decoration: underline; }
+
+    .review-wrap {
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .stars {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .star {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      color: #ffd24d;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      user-select: none;
+    }
+    .star.active {
+      background: radial-gradient(100% 100% at 50% 50%, #ffe082, #ffca28);
+      color: #0c0d11;
+      border-color: rgba(255,210,77,0.65);
+      box-shadow: 0 8px 18px rgba(255,210,77,0.35);
+    }
+    .tag-list {
+      display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 12px;
+    }
+    .tag-chip {
+      padding: 6px 10px; border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.04);
+      font-size: 12px; color: var(--fg-1);
+      cursor: pointer;
+      transition: all 160ms ease;
+    }
+    .tag-chip.active {
+      border-color: rgba(159,90,224,0.6);
+      background: linear-gradient(180deg, rgba(159,90,224,0.2), rgba(159,90,224,0.1));
+      color: #eaeaf1;
+      box-shadow: 0 0 0 3px rgba(159,90,224,0.18);
+    }
+    .review-text {
+      width: 100%; min-height: 90px; resize: vertical;
+      padding: 12px 14px; border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      color: var(--fg-0);
+      outline: none;
+    }
+    .reviews-list {
+      margin-top: 14px;
+      display: grid; gap: 12px;
+    }
+    .review-item {
+      padding: 12px; border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    }
+    .review-item .meta {
+      display: flex; gap: 10px; font-size: 12px; color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .review-success {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: linear-gradient(180deg, rgba(0,212,255,0.06), rgba(159,90,224,0.06));
+      margin-top: 12px;
+      color: #c8fff3; font-weight: 600;
+    }
+    .review-success.show { display: block; }
   </style>
 
   <script src="app.js" defer></script>
@@ -328,8 +475,8 @@
         <div class="name">NOVA Reviews</div>
       </div>
       <div class="nav-links">
-        <a href="#">ホーム</a>
-        <a href="#">インフルエンサーを探す</a>
+        <a href="index.html">ホーム</a>
+        <a href="search.html">インフルエンサーを探す</a>
         <a href="#" class="cta">ログイン</a>
       </div>
     </nav>
@@ -337,10 +484,10 @@
 
   <section class="hero">
     <h1>AIインフルエンサーのユーザー別レビュー</h1>
-    <p>まずはx.comのアカウント名を登録してください。登録後、プロフィール確認やカテゴリ設定、レビュー方針の選択へと進めます。</p>
+    <p>まずはx.comのアカウント名を登録し、インフルエンサーを検索。wiki形式の紹介を確認した上でレビューを投稿できます。</p>
   </section>
 
-  <div class="container">
+  <div class="container" id="section-register">
     <div class="card fade-up" role="region" aria-labelledby="card-title">
       <div class="card-header">
         <div class="card-title">
@@ -414,6 +561,90 @@
         <div class="msg">
           <span class="dot" aria-hidden="true"></span>
           <span id="success-text">登録が完了しました。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="container" id="section-search">
+    <div class="card fade-up" role="region" aria-labelledby="search-title">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="glow-dot" aria-hidden="true"></span>
+          <span id="search-title">インフルエンサーを検索</span>
+        </div>
+        <div class="stepper" aria-label="ヒント">
+          <div class="step current">キーワードで検索 → ページへ</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="section-title">インフルエンサー名（ハンドル / 表示名）で検索</div>
+          <input id="search-input" class="search-input" type="text" placeholder="例: ai_influencer / Prompt Guru / a1_dev_bot">
+          <div id="search-hint" class="hint">登録済みのwikiから一致候補を表示します（ダミーデータ）。</div>
+          <div id="search-results" class="results" aria-live="polite"></div>
+        </div>
+        <aside class="preview" aria-label="検索のコツ">
+          <div class="section-title">検索のコツ</div>
+          <div class="profile-preview">
+            <div class="avatar" aria-hidden="true"></div>
+            <div>
+              <div class="pv-sub">ハンドルに含まれる単語で絞り込み可能です。</div>
+              <div class="pv-sub">候補の「ページへ」でwiki＋レビュー画面へ遷移します。</div>
+              <div class="pv-sub">レビューはローカル保存（localStorage）されます。</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- Influencer Page -->
+  <div class="container" id="section-influencer" style="display:none;">
+    <div class="card fade-up" role="region" aria-labelledby="inf-title">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="glow-dot" aria-hidden="true"></span>
+          <span id="inf-title">インフルエンサー詳細</span>
+        </div>
+        <div class="stepper" aria-label="現在ページ">
+          <div class="step current"><span id="inf-handle-chip" class="handle-chip">@handle</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="wiki-content" id="wiki-content">
+          <!-- wiki形式の紹介文をここにレンダリング -->
+        </div>
+
+        <div class="review-wrap">
+          <div class="section-title">レビューを投稿</div>
+          <div class="stars" id="stars">
+            <div class="star" data-value="1">★</div>
+            <div class="star" data-value="2">★</div>
+            <div class="star" data-value="3">★</div>
+            <div class="star" data-value="4">★</div>
+            <div class="star" data-value="5">★</div>
+            <span id="star-value" class="hint" style="margin-left:8px;">評価: 0 / 5</span>
+          </div>
+
+          <div class="section-title">タグを選択</div>
+          <div class="tag-list" id="tag-list">
+            <!-- タグチップをJSで挿入 -->
+          </div>
+
+          <div class="section-title">レビュー本文</div>
+          <textarea id="review-text" class="review-text" placeholder="使ってみた感想、得意分野、改善要望などを書いてください（200文字目安）"></textarea>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="review-submit">レビューを投稿</button>
+            <button class="btn btn-secondary" id="back-to-search">検索に戻る</button>
+          </div>
+
+          <div id="review-success" class="review-success" aria-live="polite">投稿が完了しました。ありがとうございます！</div>
+
+          <div class="section-title" style="margin-top: 16px;">レビュー一覧</div>
+          <div id="reviews-list" class="reviews-list" aria-live="polite"></div>
         </div>
       </div>
     </div>
