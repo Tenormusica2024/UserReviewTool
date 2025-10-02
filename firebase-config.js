@@ -15,9 +15,11 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Enable anonymous authentication
+// Enable anonymous authentication (optional - will fail if not configured)
 auth.signInAnonymously().catch(function(error) {
-  console.error('Anonymous auth error:', error);
+  console.warn('Anonymous auth not enabled:', error.message);
+  console.warn('Please enable Anonymous authentication in Firebase Console');
+  console.warn('See FIREBASE_SETUP.md for instructions');
 });
 
 // Auth state observer

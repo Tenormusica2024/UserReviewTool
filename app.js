@@ -500,7 +500,14 @@
           console.error("Registration error:", err);
           success.classList.add("show");
           success.style.background = "linear-gradient(180deg, rgba(255,107,107,0.08), rgba(255,107,107,0.06))";
-          successText.textContent = "登録に失敗しました: " + err.message;
+          
+          // Check if error is due to missing authentication
+          if (err.message && err.message.includes("permission")) {
+            successText.textContent = "Firebase設定が未完了です。FIREBASE_SETUP.mdの手順に従ってFirebase Consoleで設定を完了してください。";
+          } else {
+            successText.textContent = "登録に失敗しました: " + err.message;
+          }
+          
           submitBtn.disabled = false;
           submitBtn.textContent = "アカウントを登録";
         });
