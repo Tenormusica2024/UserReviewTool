@@ -1,11 +1,11 @@
 // Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBkRJGjwVTLR0BKsVx6bVVJmqCEPL5p3X0",
+  apiKey: "AIzaSyCceHAg85kW2w7PPI-2Otx21wfo_TgSIyg",
   authDomain: "yt-transcript-demo-2025.firebaseapp.com",
   projectId: "yt-transcript-demo-2025",
   storageBucket: "yt-transcript-demo-2025.appspot.com",
   messagingSenderId: "72885249208",
-  appId: "1:72885249208:web:8b5c4d3e2f1a0b9c8d7e6f5"
+  appId: "1:72885249208:web:2c1c9f0d8f3c4e5f6g7h8i"
 };
 
 // Initialize Firebase
