@@ -13,7 +13,7 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 const auth = firebase.auth();
-const db = firebase.firestore();
+const db = firebase.app().firestore('default');
 
 // Enable anonymous authentication (optional - will fail if not configured)
 auth.signInAnonymously().catch(function(error) {
