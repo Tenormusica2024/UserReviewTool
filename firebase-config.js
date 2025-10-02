@@ -14,7 +14,11 @@ if (!firebase.apps.length) {
 }
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
+
+// Enable anonymous authentication
+auth.signInAnonymously().catch(function(error) {
+  console.error('Anonymous auth error:', error);
+});
 
 // Auth state observer
 auth.onAuthStateChanged((user) => {
