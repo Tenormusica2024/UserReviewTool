@@ -2,73 +2,71 @@
 "use strict";
 
 (function () {
-  // Dummy data: influencers with wiki text (same as index.html/app.js)
-  var DUMMY_INFLUENCERS = [
-    {
-      handle: "ai_influencer",
-      display: "AI インフルエンサー研究所",
-      platform: "x.com",
-      wiki: [
-        "== 概要 ==",
-        "'''AI インフルエンサー研究所''' は最新のAIトレンド解説とプロンプト共有を中心に活動する情報発信アカウント。",
-        "* 主要分野: 生成AI、プロンプト工学、アプリ連携",
-        "* 定期企画: #PromptFriday にてコミュニティ投稿を紹介",
-        "",
-        "== 活動方針 ==",
-        "''実用性'' と ''検証'' を重視し、公開情報や論文へのリンクを付して解説するスタイル。",
-        "",
-        "== リンク ==",
-        "[[https://x.com/ai_influencer|x.com プロフィール]]"
-      ].join("\n")
-    },
-    {
-      handle: "a1_dev_bot",
-      display: "A1 Dev Bot",
-      platform: "x.com",
-      wiki: [
-        "== 概要 ==",
-        "'''A1 Dev Bot''' はコードスニペットやデバッグTipsを自動配信する開発者向けボット。",
-        "* 主要分野: JavaScript / TypeScript / Node.js / Frontend",
-        "* 返信速度: 即時（キュー処理）",
-        "",
-        "== 使い方 ==",
-        "''メンション'' で質問すると、関連するコード例と注意点を返します。",
-        "",
-        "== リンク ==",
-        "[[https://x.com/a1_dev_bot|x.com プロフィール]]"
-      ].join("\n")
-    },
-    {
-      handle: "prompt_guru",
-      display: "Prompt Guru",
-      platform: "x.com",
-      wiki: [
-        "== 概要 ==",
-        "'''Prompt Guru''' は創造的なプロンプトテンプレートとチュートリアルで知られるアカウント。",
-        "* 主要分野: 物語生成、画像プロンプト、構成テクニック",
-        "* コミュニティ参加: #PromptJam を主催",
-        "",
-        "== テンプレート例 ==",
-        "* 物語生成: 三幕構成、視点切替",
-        "* 画像生成: スタイルタグ、照明条件",
-        "",
-        "== リンク ==",
-        "[[https://x.com/prompt_guru|x.com プロフィール]]"
-      ].join("\n")
-    }
-  ];
-
   function escapeHTML(s) {
     return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
-  function searchInfluencers(q) {
+  function searchInfluencers(q, callback) {
     var query = (q || "").toLowerCase().trim();
-    if (!query) return DUMMY_INFLUENCERS.slice(0, 5);
-    return DUMMY_INFLUENCERS.filter(function (inf) {
-      return inf.handle.toLowerCase().includes(query) ||
-             (inf.display || "").toLowerCase().includes(query);
-    }).slice(0, 10);
+    
+    if (!query) {
+      // Show all influencers
+      db.collection('influencers')
+        .orderBy('createdAt', 'desc')
+        .limit(10)
+        .get()
+        .then(function(snapshot) {
+          var results = [];
+          snapshot.forEach(function(doc) {
+            results.push(doc.data());
+          });
+          callback(results);
+        })
+        .catch(function(err) {
+          console.error("Search error:", err);
+          callback([]);
+        });
+      return;
+    }
+
+    // Search by handle or display name
+    db.collection('influencers')
+      .where('handle', '>=', query)
+      .where('handle', '<=', query + '\uf8ff')
+      .limit(10)
+      .get()
+      .then(function(snapshot) {
+        var results = [];
+        snapshot.forEach(function(doc) {
+          results.push(doc.data());
+        });
+        
+        // Also search by display name (client-side filtering)
+        if (results.length < 5) {
+          return db.collection('influencers')
+            .orderBy('createdAt', 'desc')
+            .limit(20)
+            .get()
+            .then(function(allSnapshot) {
+              var additionalResults = [];
+              allSnapshot.forEach(function(doc) {
+                var data = doc.data();
+                var displayMatch = (data.displayName || "").toLowerCase().includes(query);
+                var alreadyIncluded = results.some(function(r) { return r.handle === data.handle; });
+                if (displayMatch && !alreadyIncluded) {
+                  additionalResults.push(data);
+                }
+              });
+              callback(results.concat(additionalResults).slice(0, 10));
+            });
+        }
+        
+        callback(results);
+      })
+      .catch(function(err) {
+        console.error("Search error:", err);
+        callback([]);
+      });
   }
 
   function renderSearchResults(items) {
@@ -76,23 +74,27 @@
     if (!container) return;
 
     if (!items.length) {
-      container.innerHTML = '<div class="pv-sub">該当がありません。</div>';
+      container.innerHTML = '<div class="pv-sub">該当がありません。インフルエンサーを登録してください。</div>';
       return;
     }
     var html = items.map(function (inf) {
-      var summary = inf.wiki.split("\n").find(function (l) { return l && !/^=+.*=+$/.test(l) && !/^\*/.test(l); }) || "";
-      summary = summary.replace(/'{2,3}/g, "");
+      var avgRating = inf.averageRating || 0;
+      var reviewCount = inf.reviewCount || 0;
+      var stars = "★".repeat(Math.round(avgRating)) + "☆".repeat(5 - Math.round(avgRating));
+      var summary = inf.displayName + " - " + (reviewCount > 0 ? reviewCount + "件のレビュー" : "レビューなし");
+      
       return [
         '<div class="result-item">',
           '<div class="avatar" aria-hidden="true"></div>',
           '<div class="info">',
             '<div class="title">',
-              '<span>' + escapeHTML(inf.display) + '</span>',
+              '<span>' + escapeHTML(inf.displayName || inf.handle) + '</span>',
               '<span class="handle-chip"><span style="opacity:0.8">@</span><span>' + escapeHTML(inf.handle) + '</span></span>',
             '</div>',
+            '<div class="summary">' + escapeHTML(stars + " " + avgRating.toFixed(1) + " / 5.0") + '</div>',
             '<div class="summary">' + escapeHTML(summary) + '</div>',
             '<div class="actions">',
-              '<button class="btn btn-primary go-page" data-handle="' + escapeHTML(inf.handle) + '">ページへ</button>',
+              '<button class="btn btn-primary go-page" data-handle="' + escapeHTML(inf.handle) + '">レビューする</button>',
             '</div>',
           '</div>',
         '</div>'
@@ -103,8 +105,7 @@
     Array.prototype.forEach.call(container.querySelectorAll(".go-page"), function (btn) {
       btn.addEventListener("click", function () {
         var h = btn.getAttribute("data-handle");
-        // Navigate to the existing influencer page in index.html (SPA route)
-        window.location.href = "index.html#/influencer/" + encodeURIComponent(h);
+        window.location.href = "index.html?influencer=" + encodeURIComponent(h);
       });
     });
   }
@@ -113,12 +114,16 @@
     var input = document.getElementById("search-input");
     if (!input) return;
 
+    var searchTimeout;
     input.addEventListener("input", function () {
-      renderSearchResults(searchInfluencers(input.value));
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function() {
+        searchInfluencers(input.value, renderSearchResults);
+      }, 300);
     });
 
     // First render
-    renderSearchResults(searchInfluencers(""));
+    searchInfluencers("", renderSearchResults);
     input.focus();
   });
 })();
