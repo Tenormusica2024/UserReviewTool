@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "yt-transcript-demo-2025"
+  },
+  "targets": {
+    "yt-transcript-demo-2025": {
+      "hosting": {
+        "nova-reviews": [
+          "nova-reviews"
+        ]
+      }
+    }
+  }
+}
